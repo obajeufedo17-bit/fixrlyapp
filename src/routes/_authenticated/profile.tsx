@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession, useRoles } from "@/lib/session";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -49,13 +49,6 @@ function ProfilePage() {
     qc.invalidateQueries({ queryKey: ["profile", user!.id] });
   };
 
-  const becomeProvider = async () => {
-    const { error } = await supabase.from("user_roles").insert({ user_id: user!.id, role: "provider" });
-    if (error) return toast.error(error.message);
-    toast.success("You can now list your services!");
-    qc.invalidateQueries({ queryKey: ["roles", user!.id] });
-    navigate({ to: "/dashboard" });
-  };
 
   const signOut = async () => {
     await qc.cancelQueries();
@@ -96,9 +89,9 @@ function ProfilePage() {
           <div className="bg-surface p-4 rounded-2xl border border-brand/5 shadow-sm">
             <h3 className="font-bold">Become a service provider</h3>
             <p className="text-xs text-brand/60 mt-1">List your services and start accepting bookings.</p>
-            <button type="button" onClick={becomeProvider} className="mt-3 w-full py-2.5 border-2 border-brand rounded-xl text-sm font-bold">
-              Enable provider account
-            </button>
+            <Link to="/become-provider" className="mt-3 w-full py-2.5 border-2 border-brand rounded-xl text-sm font-bold flex items-center justify-center">
+              Get started
+            </Link>
           </div>
         )}
 
