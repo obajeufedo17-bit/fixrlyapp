@@ -206,6 +206,54 @@ function DashboardPage() {
         </div>
       )}
 
+      <section className="px-4 mb-2">
+        <div className="bg-surface p-4 rounded-2xl border border-brand/5 shadow-sm">
+          <div className="flex justify-between items-center mb-3">
+            <h2 className="font-bold">Orders</h2>
+            <Link to="/bookings" className="text-[10px] font-bold uppercase tracking-wider text-accent">View all →</Link>
+          </div>
+          {bookings.length === 0 ? (
+            <p className="text-xs text-brand/50 py-6 text-center">No orders yet. Once customers book you, they'll appear here.</p>
+          ) : (
+            <div className="space-y-2">
+              {bookings.slice(0, 6).map((b: any) => (
+                <div key={b.id} className="p-3 bg-canvas rounded-xl">
+                  <div className="flex justify-between items-start gap-2">
+                    <div className="min-w-0">
+                      <div className="text-[10px] font-bold uppercase text-brand/40">
+                        {b.category?.icon} {b.category?.name}
+                      </div>
+                      <div className="font-bold text-sm truncate">{b.customer?.full_name ?? "Customer"}</div>
+                      <div className="text-[11px] text-brand/60 mt-0.5">
+                        {new Date(b.scheduled_at).toLocaleString()} • {b.duration_hours}h
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-end gap-1 shrink-0">
+                      <span className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded ${statusStyles[b.status] ?? ""}`}>{b.status}</span>
+                      {b.total_price && <span className="font-mono font-bold text-xs text-accent">${Number(b.total_price).toFixed(0)}</span>}
+                    </div>
+                  </div>
+                  {(b.status === "pending" || b.status === "accepted") && (
+                    <div className="flex gap-2 mt-2">
+                      {b.status === "pending" && (
+                        <>
+                          <button onClick={() => updateStatus(b.id, "accepted")} className="flex-1 py-1.5 bg-accent text-white rounded-lg text-[11px] font-bold">Accept</button>
+                          <button onClick={() => updateStatus(b.id, "rejected")} className="flex-1 py-1.5 border border-brand/10 rounded-lg text-[11px] font-bold">Reject</button>
+                        </>
+                      )}
+                      {b.status === "accepted" && (
+                        <button onClick={() => updateStatus(b.id, "completed")} className="flex-1 py-1.5 bg-brand text-white rounded-lg text-[11px] font-bold">Mark completed</button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+
       <form onSubmit={save} className="px-4 pb-6 space-y-3">
         <section className="bg-surface p-4 rounded-2xl border border-brand/5 shadow-sm space-y-3">
           <div className="flex justify-between items-center">
