@@ -89,9 +89,9 @@ function ProfilePage() {
           <div className="bg-surface p-4 rounded-2xl border border-brand/5 shadow-sm">
             <h3 className="font-bold">Become a service provider</h3>
             <p className="text-xs text-brand/60 mt-1">List your services and start accepting bookings.</p>
-            <button type="button" onClick={becomeProvider} className="mt-3 w-full py-2.5 border-2 border-brand rounded-xl text-sm font-bold">
-              Enable provider account
-            </button>
+            <Link to="/become-provider" className="mt-3 w-full py-2.5 border-2 border-brand rounded-xl text-sm font-bold flex items-center justify-center">
+              Get started
+            </Link>
           </div>
         )}
 
