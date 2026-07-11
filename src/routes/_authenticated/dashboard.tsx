@@ -53,10 +53,21 @@ function DashboardPage() {
     queryKey: ["provider-bookings", user?.id],
     enabled: !!user && isProvider,
     queryFn: async () => {
-      const { data } = await supabase.from("bookings").select("status,total_price").eq("provider_id", user!.id);
+      const { data } = await supabase
+        .from("bookings")
+        .select("*, customer:profiles!bookings_customer_id_fkey(full_name), category:service_categories(name,icon)")
+        .eq("provider_id", user!.id)
+        .order("scheduled_at", { ascending: false });
       return data ?? [];
     },
   });
+
+  const updateStatus = async (id: string, status: "accepted" | "rejected" | "completed") => {
+    const { error } = await supabase.from("bookings").update({ status }).eq("id", id);
+    if (error) return toast.error(error.message);
+    toast.success(`Booking ${status}`);
+    qc.invalidateQueries({ queryKey: ["provider-bookings", user!.id] });
+  };
 
   const stats = useMemo(() => {
     const earned = bookings.filter((b: any) => b.status === "completed").reduce((s: number, b: any) => s + (Number(b.total_price) || 0), 0);
