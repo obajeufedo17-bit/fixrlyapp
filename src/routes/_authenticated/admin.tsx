@@ -55,7 +55,7 @@ function AdminPage() {
     queryFn: async () => {
       const { data } = await supabase
         .from("provider_requests")
-        .select("*, applicant:profiles!provider_requests_user_id_fkey(full_name)")
+        .select("*")
         .order("created_at", { ascending: false });
       return (data ?? []) as any[];
     },
