@@ -264,6 +264,7 @@ function BookingModal({
   onClose: () => void;
 }) {
   const navigate = useNavigate();
+  const notify = useServerFn(notifyProviderOfBooking);
   const [categoryId, setCategoryId] = useState<string>(categories[0]?.id ?? "");
   const [scheduledAt, setScheduledAt] = useState<string>("");
   const [duration, setDuration] = useState<number>(1);
@@ -277,18 +278,26 @@ function BookingModal({
     try {
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) throw new Error("Sign in required");
-      const { error } = await supabase.from("bookings").insert({
-        customer_id: u.user.id,
-        provider_id: providerId,
-        category_id: categoryId || null,
-        scheduled_at: new Date(scheduledAt).toISOString(),
-        duration_hours: duration,
-        address,
-        notes: notes || null,
-        total_price: hourlyRate ? hourlyRate * duration : null,
-      });
+      const { data: inserted, error } = await supabase
+        .from("bookings")
+        .insert({
+          customer_id: u.user.id,
+          provider_id: providerId,
+          category_id: categoryId || null,
+          scheduled_at: new Date(scheduledAt).toISOString(),
+          duration_hours: duration,
+          address,
+          notes: notes || null,
+          total_price: hourlyRate ? hourlyRate * duration : null,
+        })
+        .select("id")
+        .single();
       if (error) throw error;
       toast.success("Booking requested!");
+      // fire-and-forget email notification
+      notify({ data: { bookingId: inserted.id } }).catch((err) =>
+        console.warn("[booking] notify failed", err),
+      );
       onClose();
       navigate({ to: "/bookings" });
     } catch (err: any) {
