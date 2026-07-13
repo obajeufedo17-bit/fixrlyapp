@@ -8,6 +8,12 @@ export const notifyProviderOfBooking = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: Input) => d)
   .handler(async ({ data, context }) => {
+    const from = process.env.EMAIL_FROM;
+    if (!from) {
+      console.warn("[booking-notify] EMAIL_FROM not set; skipping email send");
+      return { sent: false, reason: "email_not_configured" as const };
+    }
+
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const { data: booking, error } = await supabaseAdmin
@@ -20,12 +26,10 @@ export const notifyProviderOfBooking = createServerFn({ method: "POST" })
     if (error || !booking) throw new Error(error?.message ?? "Booking not found");
     if (booking.customer_id !== context.userId) throw new Error("Forbidden");
 
-    // Provider email (from auth.users)
     const { data: providerUser } = await supabaseAdmin.auth.admin.getUserById(booking.provider_id);
     const providerEmail = providerUser?.user?.email;
-    if (!providerEmail) return { sent: false, reason: "provider_no_email" };
+    if (!providerEmail) return { sent: false, reason: "provider_no_email" as const };
 
-    // Customer name
     const { data: customer } = await supabaseAdmin
       .from("profiles")
       .select("full_name")
@@ -52,19 +56,27 @@ export const notifyProviderOfBooking = createServerFn({ method: "POST" })
         <p style="margin:24px 0 0"><a href="https://fixrlyapp.lovable.app/bookings" style="background:#111;color:#fff;padding:12px 20px;border-radius:10px;text-decoration:none;font-weight:bold">Open dashboard</a></p>
       </div>`;
 
+    const text = `New booking request from ${customerName}\n\nService: ${category}\nWhen: ${when}\nDuration: ${booking.duration_hours}h\nAddress: ${booking.address ?? "—"}\nTotal: ${total}\n${booking.notes ? `Notes: ${booking.notes}\n` : ""}\nOpen dashboard: https://fixrlyapp.lovable.app/bookings`;
+
     try {
-      const result = await sendLovableEmail({
-        apiKey: process.env.LOVABLE_API_KEY!,
-        to: providerEmail,
-        subject: `New booking from ${customerName}`,
-        html,
-        idempotencyKey: `booking-notify-${booking.id}`,
-      });
-      return result;
+      const result = await sendLovableEmail(
+        {
+          to: providerEmail,
+          from,
+          subject: `New booking from ${customerName}`,
+          html,
+          text,
+        },
+        {
+          apiKey: process.env.LOVABLE_API_KEY!,
+          idempotencyKey: `booking-notify-${booking.id}`,
+        },
+      );
+      return { sent: true as const, result };
     } catch (err) {
       if (err instanceof EmailAPIError) {
         console.error("[booking-notify] email error", err.code, err.status);
-        return { sent: false, reason: err.code };
+        return { sent: false as const, reason: err.code };
       }
       throw err;
     }
