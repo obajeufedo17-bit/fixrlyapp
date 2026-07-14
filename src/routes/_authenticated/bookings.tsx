@@ -48,7 +48,7 @@ function BookingsPage() {
     const { error } = await supabase.from("bookings").update({ status }).eq("id", id);
     if (error) return toast.error(error.message);
     toast.success(`Booking ${status}`);
-    qc.invalidateQueries({ queryKey: ["bookings"] });
+    qc.invalidateQueries({ queryKey: ["bookings", user?.id, tab] });
   };
 
   return (
@@ -113,6 +113,11 @@ function BookingsPage() {
                 )}
                 {tab === "customer" && ["pending", "accepted"].includes(b.status) && (
                   <button onClick={() => updateStatus(b.id, "cancelled")} className="flex-1 py-2 border border-brand/10 rounded-lg text-xs font-bold">Cancel</button>
+                )}
+                {b.provider?.id && (
+                  <button onClick={() => navigate({ to: "/provider/$id", params: { id: b.provider.id } })} className="py-2 px-3 rounded-xl border border-brand/10 text-xs font-bold text-brand bg-white">
+                    View provider profile
+                  </button>
                 )}
                 {tab === "customer" && b.status === "completed" && (
                   <LeaveReviewButton booking={b} />

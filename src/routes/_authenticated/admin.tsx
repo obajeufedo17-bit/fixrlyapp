@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession, useRoles } from "@/lib/session";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -8,7 +8,7 @@ import { GoogleMap } from "@/components/GoogleMap";
 import { toast } from "sonner";
 import {
   Loader2, Check, X, FileText, IdCard, LayoutDashboard, Users, MapPin,
-  Briefcase, CalendarCheck, ClipboardList, Shield, ShieldOff, Power,
+  Briefcase, CalendarCheck, ClipboardList, Shield, ShieldOff, Power, CreditCard,
 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin")({
@@ -16,11 +16,12 @@ export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminPage,
 });
 
-type Tab = "overview" | "requests" | "users" | "providers" | "map" | "bookings";
+type Tab = "overview" | "requests" | "settings" | "users" | "providers" | "map" | "bookings";
 
 const tabs: { id: Tab; label: string; icon: any }[] = [
   { id: "overview", label: "Dashboard", icon: LayoutDashboard },
   { id: "requests", label: "Requests", icon: ClipboardList },
+  { id: "settings", label: "Settings", icon: CreditCard },
   { id: "users", label: "Users", icon: Users },
   { id: "providers", label: "Providers", icon: Briefcase },
   { id: "map", label: "Map", icon: MapPin },
@@ -82,6 +83,7 @@ function AdminPage() {
       <div className="px-4 py-4">
         {tab === "overview" && <OverviewTab />}
         {tab === "requests" && <RequestsTab />}
+        {tab === "settings" && <SettingsTab />}
         {tab === "users" && <UsersTab />}
         {tab === "providers" && <ProvidersTab />}
         {tab === "map" && <MapTab />}
@@ -136,6 +138,98 @@ function OverviewTab() {
           <div className="font-mono font-black text-3xl">${(stats?.revenue ?? 0).toFixed(0)}</div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function SettingsTab() {
+  const qc = useQueryClient();
+  const { data: settings } = useQuery({
+    queryKey: ["admin-settings"],
+    queryFn: async () => {
+      const { data } = await supabase.from("admin_settings").select("*").eq("id", "payments").maybeSingle();
+      return (
+        data ?? {
+          id: "payments",
+          provider_fee_percent: 10,
+          stripe_account_id: "",
+          payment_enabled: true,
+        }
+      );
+    },
+  });
+
+  const [form, setForm] = useState({
+    provider_fee_percent: "10",
+    stripe_account_id: "",
+    payment_enabled: true,
+  });
+
+  useEffect(() => {
+    if (settings) {
+      setForm({
+        provider_fee_percent: String(settings.provider_fee_percent ?? 10),
+        stripe_account_id: settings.stripe_account_id ?? "",
+        payment_enabled: settings.payment_enabled ?? true,
+      });
+    }
+  }, [settings]);
+
+  const save = async (e: FormEvent) => {
+    e.preventDefault();
+    const { error } = await supabase.from("admin_settings").upsert({
+      id: "payments",
+      provider_fee_percent: Number(form.provider_fee_percent) || 0,
+      stripe_account_id: form.stripe_account_id,
+      payment_enabled: form.payment_enabled,
+    });
+    if (error) return toast.error(error.message);
+    toast.success("Payment settings saved");
+    qc.invalidateQueries({ queryKey: ["admin-settings"] });
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="rounded-2xl bg-white/95 border border-soft p-6 shadow-soft">
+        <div className="text-sm uppercase tracking-[0.24em] text-brand/50">Payment</div>
+        <h2 className="mt-2 text-lg font-semibold">Payment configuration</h2>
+        <p className="mt-2 text-sm text-brand/60">Control payout fees and Stripe connectivity for customer payments.</p>
+      </div>
+      <form onSubmit={save} className="grid gap-4">
+        <div className="rounded-2xl bg-white/95 border border-soft p-6 shadow-soft space-y-4">
+          <label className="block">
+            <span className="text-[10px] font-bold uppercase text-brand/40">Provider fee percentage</span>
+            <input
+              type="number"
+              min="0"
+              step="1"
+              value={form.provider_fee_percent}
+              onChange={(e) => setForm({ ...form, provider_fee_percent: e.target.value })}
+              className="mt-2 w-full rounded-3xl border border-brand/10 bg-canvas px-4 py-3 text-sm outline-none"
+            />
+          </label>
+          <label className="block">
+            <span className="text-[10px] font-bold uppercase text-brand/40">Stripe account ID</span>
+            <input
+              value={form.stripe_account_id}
+              onChange={(e) => setForm({ ...form, stripe_account_id: e.target.value })}
+              className="mt-2 w-full rounded-3xl border border-brand/10 bg-canvas px-4 py-3 text-sm outline-none"
+            />
+          </label>
+          <label className="flex items-center gap-3 text-sm font-bold text-brand/70">
+            <input
+              type="checkbox"
+              checked={form.payment_enabled}
+              onChange={(e) => setForm({ ...form, payment_enabled: e.target.checked })}
+              className="h-4 w-4 rounded"
+            />
+            Accept payments in the app
+          </label>
+          <button type="submit" className="w-full rounded-2xl bg-accent px-4 py-3 text-sm font-bold text-white shadow-lg shadow-accent/20 transition hover:bg-orange-500">
+            Save payment settings
+          </button>
+        </div>
+      </form>
     </div>
   );
 }

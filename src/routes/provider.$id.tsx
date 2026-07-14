@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { type FormEvent, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
@@ -115,7 +115,7 @@ function ProviderPage() {
           </div>
         )}
         <button
-          onClick={() => history.back()}
+          onClick={() => navigate({ to: "/" })}
           className="absolute top-4 left-4 size-10 rounded-full bg-white/90 backdrop-blur grid place-items-center shadow-lg"
         >
           <ArrowLeft className="size-4" />
@@ -272,7 +272,7 @@ function BookingModal({
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const submit = async (e: React.FormEvent) => {
+  const submit = async (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
