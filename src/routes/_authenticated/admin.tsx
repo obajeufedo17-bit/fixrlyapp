@@ -178,107 +178,18 @@ function OverviewTab() {
 }
 
 function SettingsTab() {
-  const qc = useQueryClient();
-  const { data: settings } = useQuery({
-    queryKey: ["admin-settings"],
-    queryFn: async () => {
-      const { data } = await supabase.from("admin_settings").select("*").eq("id", "payments").maybeSingle();
-      return (
-        data ?? {
-          id: "payments",
-          provider_fee_percent: 10,
-          stripe_account_id: "",
-          payment_enabled: true,
-        }
-      );
-    },
-  });
-
-  const [form, setForm] = useState({
-    provider_fee_percent: "10",
-    stripe_account_id: "",
-    payment_enabled: true,
-  });
-
-  useEffect(() => {
-    if (settings) {
-      setForm({
-        provider_fee_percent: String(settings.provider_fee_percent ?? 10),
-        stripe_account_id: settings.stripe_account_id ?? "",
-        payment_enabled: settings.payment_enabled ?? true,
-      });
-    }
-  }, [settings]);
-
-  const [saving, setSaving] = useState(false);
-
-  const save = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const percent = Number(form.provider_fee_percent || 0);
-    if (Number.isNaN(percent) || percent < 0 || percent > 100) {
-      return toast.error("Provider fee must be a number between 0 and 100");
-    }
-    setSaving(true);
-    try {
-      const { error } = await supabase.from("admin_settings").upsert({
-        id: "payments",
-        provider_fee_percent: percent,
-        stripe_account_id: form.stripe_account_id,
-        payment_enabled: form.payment_enabled,
-      });
-      if (error) throw error;
-      toast.success("Payment settings saved");
-      qc.invalidateQueries({ queryKey: ["admin-settings"] });
-    } catch (err: any) {
-      toast.error(err.message ?? "Save failed");
-    } finally {
-      setSaving(false);
-    }
-  };
-
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl bg-white/95 border border-soft p-6 shadow-soft">
-        <div className="text-sm uppercase tracking-[0.24em] text-brand/50">Payment</div>
+      <div className="rounded-2xl bg-white/95 border border-brand/5 p-6 shadow-sm">
+        <div className="text-xs uppercase tracking-[0.24em] text-brand/50">Payments</div>
         <h2 className="mt-2 text-lg font-semibold">Payment configuration</h2>
-        <p className="mt-2 text-sm text-brand/60">Control payout fees and Stripe connectivity for customer payments.</p>
-      </div>
-      <form onSubmit={save} className="grid gap-4">
-        <div className="rounded-2xl bg-white/95 border border-soft p-6 shadow-soft space-y-4">
-          <label className="block">
-            <span className="text-[10px] font-bold uppercase text-brand/40">Provider fee percentage</span>
-            <input
-              type="number"
-              min="0"
-              step="1"
-              value={form.provider_fee_percent}
-              onChange={(e) => setForm({ ...form, provider_fee_percent: e.target.value })}
-              className="mt-2 w-full rounded-3xl border border-brand/10 bg-canvas px-4 py-3 text-sm outline-none"
-            />
-          </label>
-          <label className="block">
-            <span className="text-[10px] font-bold uppercase text-brand/40">Stripe account ID</span>
-            <input
-              value={form.stripe_account_id}
-              onChange={(e) => setForm({ ...form, stripe_account_id: e.target.value })}
-              className="mt-2 w-full rounded-3xl border border-brand/10 bg-canvas px-4 py-3 text-sm outline-none"
-            />
-          </label>
-          <label className="flex items-center gap-3 text-sm font-bold text-brand/70">
-            <input
-              type="checkbox"
-              checked={form.payment_enabled}
-              onChange={(e) => setForm({ ...form, payment_enabled: e.target.checked })}
-              className="h-4 w-4 rounded"
-            />
-            Accept payments in the app
-          </label>
-          <button type="submit" disabled={saving} className="w-full rounded-2xl bg-accent px-4 py-3 text-sm font-bold text-white shadow-lg shadow-accent/20 transition hover:bg-orange-500 disabled:opacity-60 flex items-center justify-center gap-2">
-            {saving ? <Loader2 className="size-4 animate-spin" /> : null}
-            <span>Save payment settings</span>
-          </button>
+        <p className="mt-2 text-sm text-brand/60">
+          Bookings currently run as free requests between customers and providers. Connect a payment provider (Stripe or Paddle) to start collecting bookings, deposits, and taking a platform fee.
+        </p>
+        <div className="mt-4 p-4 rounded-xl bg-canvas border border-brand/5 text-xs text-brand/60">
+          <b className="text-brand">Coming soon.</b> Ask to "enable Stripe" or "enable Paddle" and I'll wire up secure checkout, provider payouts, and receipts for the booking flow.
         </div>
-      </form>
+      </div>
     </div>
   );
 }
