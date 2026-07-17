@@ -26,6 +26,7 @@ function BookingsPage() {
   const isProvider = roles.includes("provider");
   const [tab, setTab] = useState<"customer" | "provider">(isProvider ? "provider" : "customer");
   const qc = useQueryClient();
+  const navigate = useNavigate();
 
   const { data: bookings = [], isLoading } = useQuery({
     queryKey: ["bookings", user?.id, tab],
