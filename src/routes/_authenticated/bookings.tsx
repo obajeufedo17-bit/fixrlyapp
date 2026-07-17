@@ -26,6 +26,7 @@ function BookingsPage() {
   const isProvider = roles.includes("provider");
   const [tab, setTab] = useState<"customer" | "provider">(isProvider ? "provider" : "customer");
   const qc = useQueryClient();
+  const navigate = useNavigate();
 
   const { data: bookings = [], isLoading } = useQuery({
     queryKey: ["bookings", user?.id, tab],
@@ -35,7 +36,7 @@ function BookingsPage() {
       const { data, error } = await supabase
         .from("bookings")
         .select(
-          "*, provider:provider_profiles!bookings_provider_id_fkey(business_name), customer:profiles!bookings_customer_id_fkey(full_name), category:service_categories(name,icon)",
+          "*, provider:provider_profiles!bookings_provider_id_fkey(id,business_name), customer:profiles!bookings_customer_id_fkey(full_name), category:service_categories(name,icon)",
         )
         .eq(col, user!.id)
         .order("scheduled_at", { ascending: false });

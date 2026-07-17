@@ -1,15 +1,22 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, CalendarCheck, User, LayoutDashboard } from "lucide-react";
-
-const items = [
-  { to: "/", label: "Home", icon: Home },
-  { to: "/bookings", label: "Bookings", icon: CalendarCheck },
-  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/profile", label: "Profile", icon: User },
-] as const;
+import { Home, CalendarCheck, User, LayoutDashboard, Shield } from "lucide-react";
+import { useSession, useRoles } from "@/lib/session";
 
 export function BottomNav() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { user } = useSession();
+  const { data: roles = [] } = useRoles(user);
+  const isProvider = roles.includes("provider");
+  const isAdmin = roles.includes("admin");
+
+  const items = [
+    { to: "/", label: "Home", icon: Home },
+    { to: "/bookings", label: "Bookings", icon: CalendarCheck },
+    ...(isProvider ? [{ to: "/dashboard", label: "Dashboard", icon: LayoutDashboard }] : []),
+    ...(isAdmin ? [{ to: "/admin", label: "Admin", icon: Shield }] : []),
+    { to: "/profile", label: "Profile", icon: User },
+  ] as const;
+
   return (
     <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-white/95 backdrop-blur-md px-4 pt-2 pb-[max(env(safe-area-inset-bottom),0.75rem)]">
       <div className="mx-auto flex max-w-lg justify-between">
