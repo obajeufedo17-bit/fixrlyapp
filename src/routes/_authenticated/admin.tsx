@@ -568,6 +568,7 @@ function ProvidersTab() {
 
 /* ---------- Map ---------- */
 function MapTab() {
+  const qc = useQueryClient();
   const { data: providers = [] } = useQuery({
     queryKey: ["admin-map-providers"],
     queryFn: async () => {
@@ -580,12 +581,81 @@ function MapTab() {
     },
   });
 
+  const { data: mapCfg } = useQuery({
+    queryKey: ["admin-map-cfg"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("admin_settings" as any)
+        .select("publishable_key")
+        .eq("id", "map")
+        .maybeSingle();
+      return (data ?? { publishable_key: "" }) as any;
+    },
+  });
+
+  const [apiKey, setApiKey] = useState("");
+  const [saving, setSaving] = useState(false);
+  useEffect(() => { setApiKey(mapCfg?.publishable_key ?? ""); }, [mapCfg]);
+
+  const saveKey = async (e: FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    const { error } = await supabase.from("admin_settings" as any).upsert({
+      id: "map",
+      provider: "google_maps",
+      mode: "live",
+      publishable_key: apiKey.trim() || null,
+      currency: "NGN",
+      platform_fee_percent: 0,
+      payment_enabled: false,
+    });
+    setSaving(false);
+    if (error) return toast.error(error.message);
+    toast.success("Map key saved — reload to apply");
+    qc.invalidateQueries({ queryKey: ["admin-map-cfg"] });
+  };
+
   const center = providers.length
     ? { lat: providers[0].latitude, lng: providers[0].longitude }
-    : { lat: 40.7128, lng: -74.006 };
+    : { lat: 9.082, lng: 8.6753 };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
+      <form onSubmit={saveKey} className="rounded-2xl bg-white p-5 border border-brand/5 shadow-sm space-y-3">
+        <div>
+          <div className="text-[10px] uppercase tracking-[0.24em] text-brand/50 font-bold">Google Maps</div>
+          <h2 className="mt-1 text-lg font-black">Manual API key</h2>
+          <p className="text-xs text-brand/60 mt-1">
+            Paste a browser-restricted Google Maps JavaScript API key. Leave blank to fall back to the built-in Lovable connector key.
+          </p>
+        </div>
+        <input
+          value={apiKey}
+          onChange={(e) => setApiKey(e.target.value)}
+          placeholder="AIza..."
+          className="w-full rounded-xl border border-brand/10 bg-canvas px-3 py-2.5 text-sm font-mono outline-none focus:border-accent"
+        />
+        <div className="flex items-center gap-2">
+          <button
+            type="submit"
+            disabled={saving}
+            className="rounded-xl bg-accent px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-accent/20 disabled:opacity-60 flex items-center gap-2"
+          >
+            {saving && <Loader2 className="size-4 animate-spin" />}
+            Save key
+          </button>
+          {apiKey && (
+            <button
+              type="button"
+              onClick={() => { setApiKey(""); }}
+              className="rounded-xl border border-brand/10 px-3 py-2.5 text-xs font-bold uppercase"
+            >
+              Clear
+            </button>
+          )}
+        </div>
+      </form>
+
       <div className="h-[380px] rounded-2xl overflow-hidden border border-brand/10">
         <GoogleMap
           center={center}
