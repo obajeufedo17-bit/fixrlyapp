@@ -283,7 +283,7 @@ function DashboardPage() {
                           <span className={`rounded-full px-2 py-1 text-[10px] font-bold uppercase ${statusStyles[b.status] ?? "bg-slate-100 text-slate-700"}`}>
                             {b.status}
                           </span>
-                          {b.total_price && <span className="font-mono text-sm font-bold text-accent">${Number(b.total_price).toFixed(0)}</span>}
+                          {b.total_price && <span className="font-mono text-sm font-bold text-accent">₦{Number(b.total_price).toFixed(0)}</span>}
                         </div>
                       </div>
                       {(b.status === "pending" || b.status === "accepted") && (

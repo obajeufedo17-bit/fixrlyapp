@@ -170,7 +170,7 @@ function OverviewTab() {
         </div>
         <div className="p-4 rounded-2xl bg-accent text-white">
           <div className="text-[10px] font-bold uppercase tracking-wider text-white/80">Revenue (completed)</div>
-          <div className="font-mono font-black text-3xl">${(stats?.revenue ?? 0).toFixed(0)}</div>
+          <div className="font-mono font-black text-3xl">₦{(stats?.revenue ?? 0).toFixed(0)}</div>
         </div>
       </div>
     </div>
@@ -711,7 +711,7 @@ function BookingsTab() {
             </div>
             <div className="flex flex-col items-end gap-1 shrink-0">
               <StatusPill status={b.status} />
-              {b.total_price && <span className="font-mono font-bold text-xs text-accent">${Number(b.total_price).toFixed(0)}</span>}
+              {b.total_price && <span className="font-mono font-bold text-xs text-accent">₦{Number(b.total_price).toFixed(0)}</span>}
             </div>
           </div>
         </div>

@@ -98,7 +98,7 @@ function BookingsPage() {
                 </div>
                 <div className="flex flex-col items-end gap-2 shrink-0">
                   <span className={`text-[10px] font-bold uppercase px-2 py-1 rounded ${statusStyles[b.status]}`}>{b.status}</span>
-                  {b.total_price && <span className="font-mono font-bold text-sm text-accent">${Number(b.total_price).toFixed(0)}</span>}
+                  {b.total_price && <span className="font-mono font-bold text-sm text-accent">₦{Number(b.total_price).toFixed(0)}</span>}
                 </div>
               </div>
 

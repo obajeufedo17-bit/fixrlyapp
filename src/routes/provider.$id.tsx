@@ -148,7 +148,7 @@ function ProviderPage() {
             <div className="mt-4 pt-4 border-t border-brand/5 flex items-center justify-between">
               <div>
                 <div className="text-[10px] font-bold uppercase text-brand/40">Rate</div>
-                <div className="font-mono font-bold text-lg text-accent">${Number(data.hourly_rate).toFixed(0)}<span className="text-xs text-brand/60">/hr</span></div>
+                <div className="font-mono font-bold text-lg text-accent">₦{Number(data.hourly_rate).toFixed(0)}<span className="text-xs text-brand/60">/hr</span></div>
               </div>
               {data.availability_note && (
                 <div className="text-right">
@@ -325,7 +325,7 @@ function BookingModal({
             <label className="text-xs font-bold uppercase text-brand/40">Duration</label>
             <input type="number" min={0.5} step={0.5} value={duration} onChange={(e) => setDuration(Number(e.target.value))} className="w-24 bg-canvas rounded-xl py-2 px-3 text-sm outline-none" />
             <span className="text-xs text-brand/60">hours</span>
-            {hourlyRate && <span className="ml-auto text-sm font-bold text-accent">${(hourlyRate * duration).toFixed(2)}</span>}
+            {hourlyRate && <span className="ml-auto text-sm font-bold text-accent">₦{(hourlyRate * duration).toFixed(2)}</span>}
           </div>
           <input required value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Service address" className="w-full bg-canvas rounded-xl py-2.5 px-3 text-sm outline-none" />
           <textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Notes (optional)" rows={3} className="w-full bg-canvas rounded-xl py-2.5 px-3 text-sm outline-none resize-none" />
