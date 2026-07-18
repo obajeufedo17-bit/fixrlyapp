@@ -57,7 +57,7 @@ export function ProviderCard({ p }: { p: ProviderCardData }) {
             {p.hourly_rate !== null && (
               <div className="flex flex-col">
                 <span className="text-brand/40">Rate</span>
-                <span className="text-accent">${Number(p.hourly_rate).toFixed(0)}/hr</span>
+                <span className="text-accent">₦{Number(p.hourly_rate).toFixed(0)}/hr</span>
               </div>
             )}
           </div>

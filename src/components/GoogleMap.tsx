@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 type Marker = { lat: number; lng: number; label?: string; id?: string; onClick?: () => void };
 
@@ -10,22 +11,39 @@ declare global {
   }
 }
 
+async function resolveMapKey(): Promise<string | undefined> {
+  try {
+    const { data } = await supabase
+      .from("admin_settings" as any)
+      .select("publishable_key")
+      .eq("id", "map")
+      .maybeSingle();
+    const k = (data as any)?.publishable_key?.trim();
+    if (k) return k;
+  } catch {
+    /* fall through to env */
+  }
+  return import.meta.env.VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY as string | undefined;
+}
+
 function loadMaps() {
   if (typeof window === "undefined") return Promise.reject(new Error("no window"));
   if (window.google?.maps) return Promise.resolve();
   if (window.__gmapLoading) return window.__gmapLoading;
-  const key = import.meta.env.VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY as string | undefined;
   const channel = import.meta.env.VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_TRACKING_ID as string | undefined;
-  if (!key) return Promise.reject(new Error("Missing Google Maps browser key"));
-  window.__gmapLoading = new Promise<void>((resolve, reject) => {
-    window.__initGoogleMap = () => resolve();
-    const script = document.createElement("script");
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${key}&loading=async&callback=__initGoogleMap${channel ? `&channel=${channel}` : ""}`;
-    script.async = true;
-    script.defer = true;
-    script.onerror = () => reject(new Error("Failed to load Google Maps"));
-    document.head.appendChild(script);
-  });
+  window.__gmapLoading = (async () => {
+    const key = await resolveMapKey();
+    if (!key) throw new Error("Missing Google Maps browser key");
+    await new Promise<void>((resolve, reject) => {
+      window.__initGoogleMap = () => resolve();
+      const script = document.createElement("script");
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${key}&loading=async&callback=__initGoogleMap${channel ? `&channel=${channel}` : ""}`;
+      script.async = true;
+      script.defer = true;
+      script.onerror = () => reject(new Error("Failed to load Google Maps"));
+      document.head.appendChild(script);
+    });
+  })();
   return window.__gmapLoading;
 }
 

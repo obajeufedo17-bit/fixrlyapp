@@ -38,7 +38,7 @@ export const notifyProviderOfBooking = createServerFn({ method: "POST" })
 
     const when = new Date(booking.scheduled_at).toLocaleString();
     const category = (booking as any).category?.name ?? "Service";
-    const total = booking.total_price ? `$${Number(booking.total_price).toFixed(2)}` : "—";
+    const total = booking.total_price ? `₦${Number(booking.total_price).toFixed(2)}` : "—";
     const customerName = customer?.full_name ?? "A customer";
 
     const html = `

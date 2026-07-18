@@ -7,7 +7,7 @@ import { useSession } from "@/lib/session";
 import { GoogleMap } from "@/components/GoogleMap";
 import { BottomNav } from "@/components/BottomNav";
 import { notifyProviderOfBooking } from "@/lib/booking-notifications.functions";
-import { ArrowLeft, Star, MapPin, Loader2, Phone, Mail, Heart, Users } from "lucide-react";
+import { ArrowLeft, Star, MapPin, Loader2, Phone, Mail, Heart, Users, ThumbsUp, ThumbsDown } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/provider/$id")({
@@ -92,6 +92,42 @@ function ProviderPage() {
     qc.invalidateQueries({ queryKey: ["follows", id] });
   };
 
+  const { data: reactions } = useQuery({
+    queryKey: ["reactions", id, user?.id],
+    queryFn: async () => {
+      const { data: rows } = await supabase
+        .from("provider_reactions" as any)
+        .select("reaction,user_id")
+        .eq("provider_id", id);
+      const list = (rows ?? []) as any[];
+      const likes = list.filter((r) => r.reaction === "like").length;
+      const dislikes = list.filter((r) => r.reaction === "dislike").length;
+      const mine = user ? list.find((r) => r.user_id === user.id)?.reaction ?? null : null;
+      return { likes, dislikes, mine: mine as "like" | "dislike" | null };
+    },
+  });
+
+  const react = async (kind: "like" | "dislike") => {
+    if (!user) return navigate({ to: "/auth", search: { redirect: `/provider/${id}` } });
+    if (reactions?.mine === kind) {
+      const { error } = await supabase
+        .from("provider_reactions" as any)
+        .delete()
+        .eq("provider_id", id)
+        .eq("user_id", user.id);
+      if (error) return toast.error(error.message);
+    } else {
+      const { error } = await supabase
+        .from("provider_reactions" as any)
+        .upsert(
+          { provider_id: id, user_id: user.id, reaction: kind },
+          { onConflict: "provider_id,user_id" },
+        );
+      if (error) return toast.error(error.message);
+    }
+    qc.invalidateQueries({ queryKey: ["reactions", id, user?.id] });
+  };
+
   const [showBook, setShowBook] = useState(false);
 
   if (isLoading) {
@@ -148,7 +184,7 @@ function ProviderPage() {
             <div className="mt-4 pt-4 border-t border-brand/5 flex items-center justify-between">
               <div>
                 <div className="text-[10px] font-bold uppercase text-brand/40">Rate</div>
-                <div className="font-mono font-bold text-lg text-accent">${Number(data.hourly_rate).toFixed(0)}<span className="text-xs text-brand/60">/hr</span></div>
+                <div className="font-mono font-bold text-lg text-accent">₦{Number(data.hourly_rate).toFixed(0)}<span className="text-xs text-brand/60">/hr</span></div>
               </div>
               {data.availability_note && (
                 <div className="text-right">
@@ -189,6 +225,34 @@ function ProviderPage() {
             />
           </div>
         )}
+
+        <div className="mt-4 bg-surface p-3 rounded-2xl border border-brand/5 flex items-center justify-between">
+          <div className="text-[10px] font-bold uppercase tracking-widest text-brand/40">Reactions</div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => react("like")}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border transition ${
+                reactions?.mine === "like"
+                  ? "bg-green-600 text-white border-green-600"
+                  : "bg-white border-brand/10 text-brand hover:border-green-500"
+              }`}
+            >
+              <ThumbsUp className={`size-4 ${reactions?.mine === "like" ? "fill-white" : ""}`} />
+              {reactions?.likes ?? 0}
+            </button>
+            <button
+              onClick={() => react("dislike")}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border transition ${
+                reactions?.mine === "dislike"
+                  ? "bg-red-600 text-white border-red-600"
+                  : "bg-white border-brand/10 text-brand hover:border-red-500"
+              }`}
+            >
+              <ThumbsDown className={`size-4 ${reactions?.mine === "dislike" ? "fill-white" : ""}`} />
+              {reactions?.dislikes ?? 0}
+            </button>
+          </div>
+        </div>
 
         <div className="mt-6">
           <h2 className="font-bold text-lg mb-3">Reviews</h2>
@@ -325,7 +389,7 @@ function BookingModal({
             <label className="text-xs font-bold uppercase text-brand/40">Duration</label>
             <input type="number" min={0.5} step={0.5} value={duration} onChange={(e) => setDuration(Number(e.target.value))} className="w-24 bg-canvas rounded-xl py-2 px-3 text-sm outline-none" />
             <span className="text-xs text-brand/60">hours</span>
-            {hourlyRate && <span className="ml-auto text-sm font-bold text-accent">${(hourlyRate * duration).toFixed(2)}</span>}
+            {hourlyRate && <span className="ml-auto text-sm font-bold text-accent">₦{(hourlyRate * duration).toFixed(2)}</span>}
           </div>
           <input required value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Service address" className="w-full bg-canvas rounded-xl py-2.5 px-3 text-sm outline-none" />
           <textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Notes (optional)" rows={3} className="w-full bg-canvas rounded-xl py-2.5 px-3 text-sm outline-none resize-none" />
