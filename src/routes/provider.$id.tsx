@@ -7,7 +7,7 @@ import { useSession } from "@/lib/session";
 import { GoogleMap } from "@/components/GoogleMap";
 import { BottomNav } from "@/components/BottomNav";
 import { notifyProviderOfBooking } from "@/lib/booking-notifications.functions";
-import { ArrowLeft, Star, MapPin, Loader2, Phone, Mail, Heart, Users } from "lucide-react";
+import { ArrowLeft, Star, MapPin, Loader2, Phone, Mail, Heart, Users, ThumbsUp, ThumbsDown } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/provider/$id")({
