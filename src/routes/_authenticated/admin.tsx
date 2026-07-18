@@ -215,7 +215,7 @@ function SettingsTab() {
         provider: settings.provider ?? "none",
         mode: settings.mode ?? "sandbox",
         publishable_key: settings.publishable_key ?? "",
-        currency: settings.currency ?? "USD",
+        currency: settings.currency ?? "NGN",
         platform_fee_percent: String(settings.platform_fee_percent ?? 10),
         payment_enabled: !!settings.payment_enabled,
       });
