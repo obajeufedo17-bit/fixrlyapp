@@ -193,7 +193,7 @@ function SettingsTab() {
         provider: "none",
         mode: "sandbox",
         publishable_key: "",
-        currency: "USD",
+        currency: "NGN",
         platform_fee_percent: 10,
         payment_enabled: false,
       }) as any;
@@ -204,7 +204,7 @@ function SettingsTab() {
     provider: "none",
     mode: "sandbox",
     publishable_key: "",
-    currency: "USD",
+    currency: "NGN",
     platform_fee_percent: "10",
     payment_enabled: false,
   });
@@ -551,7 +551,7 @@ function ProvidersTab() {
           <div className="min-w-0">
             <div className="font-bold text-sm truncate">{p.business_name}</div>
             <div className="text-xs text-brand/60 truncate">
-              {p.city ?? "—"}{p.hourly_rate ? ` · $${Number(p.hourly_rate).toFixed(0)}/hr` : ""}
+              {p.city ?? "—"}{p.hourly_rate ? ` · ₦${Number(p.hourly_rate).toFixed(0)}/hr` : ""}
             </div>
           </div>
           <button

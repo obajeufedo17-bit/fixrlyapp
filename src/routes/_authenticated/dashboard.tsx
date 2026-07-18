@@ -226,7 +226,7 @@ function DashboardPage() {
               <Stat label="Pending" value={stats.pending} />
               <Stat label="Accepted" value={stats.accepted} />
               <Stat label="Completed" value={stats.completed} />
-              <Stat label="Earnings" value={`$${stats.earned.toFixed(0)}`} accent />
+              <Stat label="Earnings" value={`₦${stats.earned.toFixed(0)}`} accent />
             </div>
 
             <div className="mt-6 rounded-3xl bg-slate-50 p-5 text-sm text-brand/70">
@@ -324,7 +324,7 @@ function DashboardPage() {
               <Field label="Business name" required value={form.business_name} onChange={(v) => setForm({ ...form, business_name: v })} />
               <Field label="Bio" textarea value={form.bio} onChange={(v) => setForm({ ...form, bio: v })} />
               <div className="grid gap-3 sm:grid-cols-2">
-                <Field label="Hourly rate ($)" value={form.hourly_rate} type="number" onChange={(v) => setForm({ ...form, hourly_rate: v })} />
+                <Field label="Hourly rate (₦)" value={form.hourly_rate} type="number" onChange={(v) => setForm({ ...form, hourly_rate: v })} />
                 <Field label="Service radius (km)" value={String(form.service_radius_km)} type="number" onChange={(v) => setForm({ ...form, service_radius_km: Number(v) || 0 })} />
               </div>
               <Field label="Phone" value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} />
