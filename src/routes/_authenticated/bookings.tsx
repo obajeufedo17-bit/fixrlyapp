@@ -149,8 +149,8 @@ function BookingsPage() {
                 )}
               </div>
             </div>
-          ))
-        )}
+          ));
+        })()}
       </div>
       <BottomNav />
     </div>
