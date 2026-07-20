@@ -311,7 +311,7 @@ function ProviderPage() {
           <button
             onClick={() => {
               if (!user) return navigate({ to: "/auth", search: { redirect: `/book/${id}` } });
-              navigate({ to: "/_authenticated/book/$id" as any, params: { id } });
+              navigate({ to: "/book/$id", params: { id } });
             }}
             className="flex-1 h-12 bg-accent text-white rounded-xl text-sm font-bold shadow-lg shadow-accent/20"
           >
