@@ -275,6 +275,17 @@ function SettingsTab() {
         </p>
       </div>
 
+      <div className="rounded-[1.35rem] border border-brand/10 bg-white/90 p-4 shadow-[0_16px_40px_rgba(17,28,58,0.06)]">
+        <div className="text-[10px] font-black uppercase tracking-[0.24em] text-brand/40">Storage</div>
+        <div className="mt-2 flex items-center justify-between gap-3 rounded-2xl border border-brand/10 bg-[#fffaf4] px-3 py-3">
+          <div>
+            <div className="text-sm font-bold text-slate-800">Upload bucket</div>
+            <div className="text-xs text-slate-600">Use the Supabase bucket named <span className="font-semibold text-brand">file</span> for provider documents and uploads.</div>
+          </div>
+          <div className="rounded-full bg-brand/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-brand">Configured</div>
+        </div>
+      </div>
+
       <form onSubmit={save} className="space-y-4 rounded-[1.35rem] border border-brand/10 bg-white/90 p-5 shadow-[0_16px_40px_rgba(17,28,58,0.06)]">
         <div>
           <div className="mb-2 text-[10px] font-black uppercase tracking-[0.24em] text-brand/40">Provider</div>
@@ -621,11 +632,11 @@ function MapTab() {
 
   return (
     <div className="space-y-4">
-      <form onSubmit={saveKey} className="rounded-2xl bg-white p-5 border border-brand/5 shadow-sm space-y-3">
+      <form onSubmit={saveKey} className="space-y-3 rounded-[1.35rem] border border-brand/10 bg-white/90 p-5 shadow-[0_16px_40px_rgba(17,28,58,0.06)]">
         <div>
-          <div className="text-[10px] uppercase tracking-[0.24em] text-brand/50 font-bold">Google Maps</div>
-          <h2 className="mt-1 text-lg font-black">Manual API key</h2>
-          <p className="text-xs text-brand/60 mt-1">
+          <div className="text-[10px] font-black uppercase tracking-[0.24em] text-brand/50">Google Maps</div>
+          <h2 className="mt-1 text-lg font-black text-slate-800">Manual API key</h2>
+          <p className="mt-1 text-sm text-slate-600">
             Paste a browser-restricted Google Maps JavaScript API key. Leave blank to fall back to the built-in Lovable connector key.
           </p>
         </div>
@@ -633,13 +644,13 @@ function MapTab() {
           value={apiKey}
           onChange={(e) => setApiKey(e.target.value)}
           placeholder="AIza..."
-          className="w-full rounded-xl border border-brand/10 bg-canvas px-3 py-2.5 text-sm font-mono outline-none focus:border-accent"
+          className="w-full rounded-2xl border border-brand/10 bg-[#fffaf4] px-3 py-2.5 text-sm font-mono text-slate-700 outline-none transition focus:border-accent"
         />
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <button
             type="submit"
             disabled={saving}
-            className="rounded-xl bg-accent px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-accent/20 disabled:opacity-60 flex items-center gap-2"
+            className="flex items-center gap-2 rounded-2xl bg-accent px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-accent/20 transition hover:bg-orange-500 disabled:opacity-60"
           >
             {saving && <Loader2 className="size-4 animate-spin" />}
             Save key
@@ -648,7 +659,7 @@ function MapTab() {
             <button
               type="button"
               onClick={() => { setApiKey(""); }}
-              className="rounded-xl border border-brand/10 px-3 py-2.5 text-xs font-bold uppercase"
+              className="rounded-2xl border border-brand/10 px-3 py-2.5 text-xs font-bold uppercase tracking-[0.16em] text-slate-700"
             >
               Clear
             </button>
@@ -656,14 +667,14 @@ function MapTab() {
         </div>
       </form>
 
-      <div className="h-[380px] rounded-2xl overflow-hidden border border-brand/10">
+      <div className="h-[380px] overflow-hidden rounded-[1.35rem] border border-brand/10 shadow-[0_16px_40px_rgba(17,28,58,0.06)]">
         <GoogleMap
           center={center}
           zoom={6}
           markers={providers.map((p: any) => ({ id: p.id, lat: p.latitude, lng: p.longitude, label: p.business_name }))}
         />
       </div>
-      <div className="text-xs text-brand/60">
+      <div className="text-sm text-slate-600">
         Showing {providers.length} pinned provider{providers.length === 1 ? "" : "s"}.
         Providers without a pinned location won't appear here — remind them to set their service area.
       </div>
