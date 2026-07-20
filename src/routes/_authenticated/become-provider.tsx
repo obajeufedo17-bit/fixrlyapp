@@ -154,7 +154,7 @@ function BecomeProviderPage() {
     try {
       const ext = file.name.split(".").pop() || "bin";
       const path = `${user.id}/${kind}-${Date.now()}.${ext}`;
-      const { error } = await supabase.storage.from("provider-docs").upload(path, file, { upsert: true });
+      const { error } = await supabase.storage.from("file").upload(path, file, { upsert: true });
       if (error) throw error;
       setForm((f) => ({
         ...f,

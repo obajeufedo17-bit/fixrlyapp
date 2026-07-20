@@ -16,7 +16,18 @@ CREATE POLICY "Admins can view admin settings"
   TO authenticated
   USING (public.has_role(auth.uid(), 'admin'));
 
-CREATE POLICY "Admins can manage admin settings"
-  ON public.admin_settings FOR INSERT, UPDATE, DELETE
+CREATE POLICY "Admins can insert admin settings"
+  ON public.admin_settings FOR INSERT
   TO authenticated
   WITH CHECK (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Admins can update admin settings"
+  ON public.admin_settings FOR UPDATE
+  TO authenticated
+  USING (public.has_role(auth.uid(), 'admin'))
+  WITH CHECK (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Admins can delete admin settings"
+  ON public.admin_settings FOR DELETE
+  TO authenticated
+  USING (public.has_role(auth.uid(), 'admin'));

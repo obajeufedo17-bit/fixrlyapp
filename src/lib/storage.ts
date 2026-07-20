@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 const MAX_SIZE = 5 * 1024 * 1024;
 
 export async function uploadUserFile(
-  bucket: "avatars" | "provider-photos" | "provider-docs",
+  bucket: "avatars" | "provider-photos" | "file",
   userId: string,
   file: File,
   prefix: string,
@@ -14,7 +14,7 @@ export async function uploadUserFile(
   const { error } = await supabase.storage.from(bucket).upload(path, file, { upsert: true });
   if (error) throw error;
 
-  if (bucket === "provider-docs") return path;
+  if (bucket === "file") return path;
 
   const { data } = supabase.storage.from(bucket).getPublicUrl(path);
   return data.publicUrl;

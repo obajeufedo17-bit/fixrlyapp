@@ -8,7 +8,7 @@ import { geocodeLocation } from "@/lib/geocode.functions";
 import { BottomNav } from "@/components/BottomNav";
 import { GoogleMap } from "@/components/GoogleMap";
 import { ProviderCard, type ProviderCardData } from "@/components/ProviderCard";
-import { Search, MapPin, Loader2 } from "lucide-react";
+import { Search, MapPin, Loader2, Compass } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/")({
@@ -145,7 +145,6 @@ function Home() {
 
   useEffect(() => {
     if (!coords && typeof window !== "undefined" && navigator.geolocation) {
-      // Non-blocking attempt
       navigator.geolocation.getCurrentPosition(
         (pos) => setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude, label: "Current location" }),
         () => {},
@@ -161,107 +160,145 @@ function Home() {
     .map((p) => ({ lat: p.latitude!, lng: p.longitude!, id: p.id, onClick: () => navigate({ to: "/provider/$id", params: { id: p.id } }) }));
 
   return (
-    <div className="min-h-screen bg-canvas font-sans text-brand pb-24">
-      <header className="sticky top-0 z-30 bg-surface border-b border-brand/5 px-4 pt-6 pb-4">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex flex-col min-w-0">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-brand/40">Location</span>
-            <span className="text-sm font-semibold truncate">{coords?.label ?? "Set your location below"}</span>
+    <div className="min-h-screen bg-canvas pb-24 text-brand">
+      <div className="mx-auto flex max-w-5xl flex-col px-4 pb-8 pt-4 sm:px-6 lg:px-8">
+        <header className="rounded-[28px] border border-brand/10 bg-gradient-to-br from-white via-white to-orange-50/80 p-4 shadow-[0_18px_45px_rgba(17,28,58,0.08)]">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="grid size-11 place-items-center rounded-2xl bg-gradient-to-br from-accent to-[#ffb267] text-white shadow-lg shadow-accent/20">
+                <Compass className="size-5" />
+              </div>
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-brand/40">Nearby marketplace</p>
+                <h1 className="text-lg font-semibold text-brand">Find trusted help fast</h1>
+              </div>
+            </div>
+            <button
+              onClick={() => navigate({ to: user ? "/profile" : "/auth" })}
+              className="grid size-10 place-items-center rounded-full border border-brand/10 bg-white/80 text-sm font-semibold text-brand shadow-sm"
+            >
+              {user?.email?.[0]?.toUpperCase() ?? "?"}
+            </button>
           </div>
-          <button
-            onClick={() => navigate({ to: user ? "/profile" : "/auth" })}
-            className="size-10 bg-brand/5 rounded-full grid place-items-center border border-brand/10 text-sm font-bold text-brand"
-          >
-            {user?.email?.[0]?.toUpperCase() ?? "?"}
-          </button>
-        </div>
 
-        <form onSubmit={submitLocation} className="flex gap-2 mb-3">
-          <div className="relative flex-1">
-            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-brand/40" />
-            <input
-              value={locationText}
-              onChange={(e) => setLocationText(e.target.value)}
-              placeholder="City, ZIP, or address"
-              className="w-full bg-canvas rounded-xl py-2.5 pl-9 pr-3 text-sm outline-none focus:ring-2 focus:ring-accent/30"
-            />
-          </div>
-          <button
-            type="button"
-            onClick={useMyLocation}
-            disabled={geoLoading}
-            className="px-3 rounded-xl bg-brand/5 text-xs font-bold uppercase tracking-wider disabled:opacity-50"
-          >
-            {geoLoading ? <Loader2 className="size-4 animate-spin" /> : "GPS"}
-          </button>
-        </form>
+          <div className="mt-4 grid gap-3 lg:grid-cols-[1.2fr_0.8fr]">
+            <div className="rounded-[22px] border border-brand/10 bg-white/85 p-3 shadow-sm">
+              <form onSubmit={submitLocation} className="space-y-3">
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-brand/40" />
+                  <input
+                    value={locationText}
+                    onChange={(e) => setLocationText(e.target.value)}
+                    placeholder="City, ZIP, or address"
+                    className="w-full rounded-2xl border border-brand/10 bg-white py-2.5 pl-9 pr-3 text-sm outline-none transition focus:border-accent/40 focus:ring-2 focus:ring-accent/20"
+                  />
+                </div>
 
-        <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-brand/40" />
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search for cleaning, plumbing, tutoring..."
-            className="w-full bg-canvas rounded-xl py-3.5 pl-11 pr-4 text-sm outline-none focus:ring-2 focus:ring-accent/30"
-          />
-        </div>
-      </header>
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-brand/40" />
+                    <input
+                      value={query}
+                      onChange={(e) => setQuery(e.target.value)}
+                      placeholder="Search for cleaning, plumbing, tutoring..."
+                      className="w-full rounded-2xl border border-brand/10 bg-white py-3 pl-11 pr-4 text-sm outline-none transition focus:border-accent/40 focus:ring-2 focus:ring-accent/20"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={useMyLocation}
+                    disabled={geoLoading}
+                    className="rounded-2xl border border-brand/10 bg-brand/5 px-3.5 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-brand transition disabled:opacity-60"
+                  >
+                    {geoLoading ? <Loader2 className="size-4 animate-spin" /> : "Use GPS"}
+                  </button>
+                </div>
+              </form>
+            </div>
 
-      <div className="flex gap-3 overflow-x-auto px-4 py-4 no-scrollbar">
-        <button
-          onClick={() => setSelectedCat(null)}
-          className={`flex-none px-5 py-2.5 rounded-full text-xs font-medium transition-colors ${!selectedCat ? "bg-brand text-white" : "bg-surface border border-brand/5 shadow-sm"}`}
-        >
-          All Services
-        </button>
-        {categories.map((c) => (
-          <button
-            key={c.id}
-            onClick={() => setSelectedCat(c.id === selectedCat ? null : c.id)}
-            className={`flex-none px-5 py-2.5 rounded-full text-xs font-medium transition-colors ${selectedCat === c.id ? "bg-brand text-white" : "bg-surface border border-brand/5 shadow-sm"}`}
-          >
-            <span className="mr-1">{c.icon}</span>
-            {c.name}
-          </button>
-        ))}
-      </div>
-
-      <div className="px-4 mb-6">
-        <div className="relative w-full h-44 rounded-2xl overflow-hidden border border-brand/10 shadow-sm bg-canvas">
-          <GoogleMap center={mapCenter} markers={markers} zoom={coords ? 12 : 10} />
-          <div className="absolute bottom-3 left-3 pointer-events-none">
-            <div className="bg-surface px-3 py-1.5 rounded-lg text-[10px] font-bold shadow-xl flex items-center gap-2">
-              <span className="size-1.5 bg-green-500 rounded-full animate-pulse" />
-              {filtered.length} PROS {coords ? "NEAR YOU" : "AVAILABLE"}
+            <div className="rounded-[22px] bg-gradient-to-br from-[#ff7a2f] via-[#ff8f42] to-[#ffb267] p-4 text-white shadow-[0_20px_45px_rgba(255,122,47,0.22)]">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-white/80">Quick view</p>
+              <h2 className="mt-2 text-xl font-semibold">Browse nearby pros by service and location.</h2>
+              <p className="mt-2 text-sm text-white/80">
+                Compare trusted providers, see live matches, and book with confidence.
+              </p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold">Verified profiles</span>
+                <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold">Live availability</span>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
+        </header>
 
-      <div className="px-4 pb-8 space-y-4">
-        <div className="flex items-center justify-between mb-2">
-          <h2 className="font-bold text-lg">
-            {coords ? "Nearest to you" : "Top providers"}
-          </h2>
-          <span className="text-xs font-bold text-brand/40 font-mono uppercase">{filtered.length} results</span>
-        </div>
-
-        {isLoading ? (
-          <div className="grid place-items-center py-16 text-brand/40">
-            <Loader2 className="size-6 animate-spin" />
+        <section className="mt-4 rounded-[24px] border border-brand/10 bg-surface/85 p-3 shadow-soft">
+          <div className="mb-3 flex items-center justify-between">
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-brand/40">Services</p>
+              <h2 className="text-base font-semibold text-brand">Browse by category</h2>
+            </div>
+            <span className="rounded-full bg-brand/5 px-3 py-1 text-[11px] font-semibold text-brand/65">{categories.length} options</span>
           </div>
-        ) : filtered.length === 0 ? (
-          <div className="text-center py-16 text-sm text-brand/60">
-            No providers match yet.{" "}
-            {!roles?.includes("provider") && (
-              <button onClick={() => navigate({ to: "/dashboard" })} className="text-accent font-bold underline">
-                Become a provider
+          <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+            <button
+              onClick={() => setSelectedCat(null)}
+              className={`flex-none rounded-full px-4 py-2.5 text-xs font-semibold transition ${!selectedCat ? "bg-brand text-white shadow-lg shadow-brand/20" : "bg-white/80 text-brand/70 ring-1 ring-brand/10"}`}
+            >
+              All Services
+            </button>
+            {categories.map((c) => (
+              <button
+                key={c.id}
+                onClick={() => setSelectedCat(c.id === selectedCat ? null : c.id)}
+                className={`flex-none rounded-full px-4 py-2.5 text-xs font-semibold transition ${selectedCat === c.id ? "bg-brand text-white shadow-lg shadow-brand/20" : "bg-white/80 text-brand/70 ring-1 ring-brand/10"}`}
+              >
+                <span className="mr-1">{c.icon}</span>
+                {c.name}
               </button>
-            )}
+            ))}
           </div>
-        ) : (
-          filtered.map((p) => <ProviderCard key={p.id} p={p} />)
-        )}
+        </section>
+
+        <section className="mt-4">
+          <div className="relative h-48 overflow-hidden rounded-[24px] border border-brand/10 bg-surface/90 shadow-[0_16px_35px_rgba(17,28,58,0.08)]">
+            <GoogleMap center={mapCenter} markers={markers} zoom={coords ? 12 : 10} />
+            <div className="absolute inset-0 bg-gradient-to-t from-brand/12 via-transparent to-transparent" />
+            <div className="absolute bottom-3 left-3 rounded-full bg-surface/95 px-3 py-2 text-[11px] font-semibold shadow-lg backdrop-blur">
+              <div className="flex items-center gap-2">
+                <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
+                {filtered.length} pros {coords ? "near you" : "available"}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="mt-4 rounded-[24px] border border-brand/10 bg-surface/85 p-3 shadow-[0_16px_35px_rgba(17,28,58,0.06)]">
+          <div className="mb-3 flex items-center justify-between">
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-brand/40">Matches</p>
+              <h2 className="text-base font-semibold text-brand">{coords ? "Nearest to you" : "Top providers"}</h2>
+            </div>
+            <span className="rounded-full bg-brand/5 px-3 py-1 text-[11px] font-semibold text-brand/60">{filtered.length} results</span>
+          </div>
+
+          {isLoading ? (
+            <div className="grid place-items-center py-16 text-brand/40">
+              <Loader2 className="size-6 animate-spin" />
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="rounded-[20px] border border-dashed border-brand/10 bg-white/70 px-4 py-12 text-center text-sm text-brand/65">
+              No providers match yet. {" "}
+              {!roles?.includes("provider") && (
+                <button onClick={() => navigate({ to: "/dashboard" })} className="ml-1 font-semibold text-accent underline">
+                  Become a provider
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {filtered.map((p) => <ProviderCard key={p.id} p={p} />)}
+            </div>
+          )}
+        </section>
       </div>
 
       <BottomNav />

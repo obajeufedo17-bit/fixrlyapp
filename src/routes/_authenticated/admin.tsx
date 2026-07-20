@@ -386,7 +386,7 @@ function RequestsTab() {
   });
 
   const viewDoc = async (path: string) => {
-    const { data, error } = await supabase.storage.from("provider-docs").createSignedUrl(path, 300);
+    const { data, error } = await supabase.storage.from("file").createSignedUrl(path, 300);
     if (error || !data) return toast.error(error?.message ?? "Cannot open");
     window.open(data.signedUrl, "_blank");
   };
