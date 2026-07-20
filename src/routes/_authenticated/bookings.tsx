@@ -25,6 +25,7 @@ function BookingsPage() {
   const { data: roles = [] } = useRoles(user);
   const isProvider = roles.includes("provider");
   const [tab, setTab] = useState<"customer" | "provider">(isProvider ? "provider" : "customer");
+  const [filter, setFilter] = useState<"all" | "hired" | "pending" | "completed">("all");
   const qc = useQueryClient();
   const navigate = useNavigate();
 
