@@ -30,11 +30,17 @@ function ProviderPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("provider_profiles")
-        .select("*, profiles!provider_profiles_id_fkey(full_name,avatar_url,phone), provider_categories(service_categories(id,name,icon))")
+        .select("*, provider_categories(service_categories(id,name,icon))")
         .eq("id", id)
         .maybeSingle();
       if (error) throw error;
-      return data;
+      if (!data) return null;
+      const { data: prof } = await supabase
+        .from("profiles")
+        .select("full_name,avatar_url,phone")
+        .eq("id", id)
+        .maybeSingle();
+      return { ...data, profiles: prof } as any;
     },
   });
 
@@ -43,11 +49,21 @@ function ProviderPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("reviews")
-        .select("id,rating,comment,created_at,customer_id,profiles!reviews_customer_id_fkey(full_name)")
+        .select("id,rating,comment,created_at,customer_id")
         .eq("provider_id", id)
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return data as any[];
+      const rows = (data ?? []) as any[];
+      const ids = Array.from(new Set(rows.map((r) => r.customer_id).filter(Boolean)));
+      let profMap = new Map<string, any>();
+      if (ids.length) {
+        const { data: profs } = await supabase
+          .from("profiles")
+          .select("id,full_name")
+          .in("id", ids);
+        profMap = new Map((profs ?? []).map((p: any) => [p.id, p]));
+      }
+      return rows.map((r) => ({ ...r, profiles: profMap.get(r.customer_id) ?? null }));
     },
   });
 
